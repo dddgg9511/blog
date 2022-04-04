@@ -1,16 +1,16 @@
 package com.choo.blog.domain.posts;
 
+import com.choo.blog.domain.BaseEntity;
 import com.choo.blog.domain.categories.Category;
 import com.choo.blog.domain.comments.Comments;
 import com.choo.blog.domain.users.Users;
-import org.apache.catalina.User;
 
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-public class Posts {
+public class Posts extends BaseEntity {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @JoinColumn(name = "post_id")
     private Long id;

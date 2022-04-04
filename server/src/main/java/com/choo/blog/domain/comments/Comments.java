@@ -1,11 +1,12 @@
 package com.choo.blog.domain.comments;
 
+import com.choo.blog.domain.BaseEntity;
 import com.choo.blog.domain.posts.Posts;
 
 import javax.persistence.*;
 
 @Entity
-public class Comments {
+public class Comments extends BaseEntity {
     @Id @GeneratedValue
     @Column(name = "comment_id")
     private Long id;
