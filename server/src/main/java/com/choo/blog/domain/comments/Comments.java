@@ -21,7 +21,7 @@ public class Comments extends BaseEntity {
 
     private boolean secret;
 
-    private int like;
+    private int likes;
 
-    private int dislike;
+    private int dislikes;
 }

@@ -6,6 +6,7 @@ import java.util.List;
 @Entity
 public class Category {
     @Id @GeneratedValue
+    @Column(name = "category_id")
     private Long id;
 
     private String title;
@@ -13,7 +14,7 @@ public class Category {
     private int depth;
 
     @ManyToOne
-    @JoinColumn(name = "category_id", referencedColumnName = "category_parent")
+    @JoinColumn(name = "parent", referencedColumnName = "category_id")
     private Category parent;
 
     @OneToMany(mappedBy = "parent")

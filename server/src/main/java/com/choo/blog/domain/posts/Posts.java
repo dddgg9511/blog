@@ -1,14 +1,14 @@
 package com.choo.blog.domain.posts;
 
-import com.choo.blog.domain.BaseEntiry;
+import com.choo.blog.domain.BaseEntity;
 import com.choo.blog.domain.categories.Category;
 import com.choo.blog.domain.comments.Comments;
 import com.choo.blog.domain.users.Users;
+import com.choo.blog.dto.posts.PostRequestData;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.apache.catalina.User;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -19,12 +19,12 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Posts extends BaseEntiry {
+public class Posts extends BaseEntity {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @JoinColumn(name = "post_id")
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private Users author;
 
@@ -33,13 +33,13 @@ public class Posts extends BaseEntiry {
     @Lob
     private String content;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id")
     private Category category;
 
-    private int like;
+    private int likes;
 
-    private int dislike;
+    private int dislikes;
 
     @Enumerated
     private PostOpenType openType;
@@ -48,4 +48,10 @@ public class Posts extends BaseEntiry {
 
     @OneToMany(mappedBy = "posts")
     private List<Comments> commentsList = new ArrayList<>();
+
+    public void update(PostRequestData requestData){
+        title = requestData.getTitle();
+        content = requestData.getContent();
+        openType = requestData.getOpenType();
+    }
 }

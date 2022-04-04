@@ -49,8 +49,8 @@ class PostServiceTest {
                 assertThat(posts.getTitle()).isEqualTo(saveData.getTitle());
                 assertThat(posts.getContent()).isEqualTo(saveData.getContent());
                 assertThat(posts.getOpenType()).isEqualTo(saveData.getOpenType());
-                assertThat(posts.getLike()).isEqualTo(0);
-                assertThat(posts.getDislike()).isEqualTo(0);
+                assertThat(posts.getLikes()).isEqualTo(0);
+                assertThat(posts.getDislikes()).isEqualTo(0);
                 assertThat(posts.getView()).isEqualTo(0);
             }
         }

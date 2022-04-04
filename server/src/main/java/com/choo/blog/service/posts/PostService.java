@@ -3,6 +3,7 @@ package com.choo.blog.service.posts;
 import com.choo.blog.domain.posts.PostRepository;
 import com.choo.blog.domain.posts.Posts;
 import com.choo.blog.dto.posts.PostRequestData;
+import com.choo.blog.exceptions.PostNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -22,11 +23,14 @@ public class PostService {
     }
 
     public Posts save(PostRequestData saveData){
-        return null;
+        return postRepository.save(saveData.createEntity());
     }
 
     public Posts update(Long id, PostRequestData updateData){
-        return null;
+        Posts posts = postRepository.findById(id).orElseThrow(() -> new PostNotFoundException());
+        posts.update(updateData);
+
+        return posts;
     }
 
     public Posts delete(Long id){
