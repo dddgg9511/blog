@@ -1,16 +1,25 @@
 package com.choo.blog.domain.posts;
 
-import com.choo.blog.domain.BaseEntity;
+import com.choo.blog.domain.BaseEntiry;
 import com.choo.blog.domain.categories.Category;
 import com.choo.blog.domain.comments.Comments;
 import com.choo.blog.domain.users.Users;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import org.apache.catalina.User;
 
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-public class Posts extends BaseEntity {
+@Getter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class Posts extends BaseEntiry {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @JoinColumn(name = "post_id")
     private Long id;
@@ -18,6 +27,8 @@ public class Posts extends BaseEntity {
     @ManyToOne
     @JoinColumn(name = "user_id")
     private Users author;
+
+    private String title;
 
     @Lob
     private String content;

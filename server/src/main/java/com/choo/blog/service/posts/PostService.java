@@ -25,7 +25,7 @@ public class PostService {
         return null;
     }
 
-    public Posts update(PostRequestData updateData){
+    public Posts update(Long id, PostRequestData updateData){
         return null;
     }
 
