@@ -54,47 +54,47 @@ class PostServiceTest {
                 assertThat(posts.getView()).isEqualTo(0);
             }
         }
+    }
+
+    @Nested
+    @DisplayName("게시물 수정은")
+    class Descrive_update{
+        PostRequestData updateData;
+
+        @BeforeEach
+        public void setUp(){
+            updateData = prepareRequestData("_NEW");
+        }
 
         @Nested
-        @DisplayName("게시물 수정은")
-        class Descrive_update{
-            PostRequestData updateData;
+        @DisplayName("등록된 게시물 id가 주어진다면")
+        class Context_with_exist_postId{
+            Posts posts;
 
             @BeforeEach
             public void setUp(){
-                updateData = prepareRequestData("_NEW");
+                posts = postService.save(prepareRequestData(""));
             }
 
-            @Nested
-            @DisplayName("등록된 게시물 id가 주어진다면")
-            class Context_with_exist_postId{
-                Posts posts;
+            @Test
+            @DisplayName("id에 해당하는 게시물을 수정하고 수정된 게시물을 반환한다.")
+            void it_update_post_return(){
+                Posts updatePost = postService.update(posts.getId(), updateData);
 
-                @BeforeEach
-                public void setUp(){
-                    posts = postService.save(prepareRequestData(""));
-                }
-
-                @Test
-                @DisplayName("id에 해당하는 게시물을 수정하고 수정된 게시물을 반환한다.")
-                void it_update_post_return(){
-                    Posts updatePost = postService.update(posts.getId(), updateData);
-
-                    assertThat(updatePost.getTitle()).isEqualTo(updateData.getTitle());
-                    assertThat(updatePost.getContent()).isEqualTo(updateData.getContent());
-                    assertThat(updatePost.getOpenType()).isEqualTo(updateData.getOpenType());
-                }
+                assertThat(updatePost.getTitle()).isEqualTo(updateData.getTitle());
+                assertThat(updatePost.getContent()).isEqualTo(updateData.getContent());
+                assertThat(updatePost.getOpenType()).isEqualTo(updateData.getOpenType());
             }
+        }
 
-            @Nested
-            @DisplayName("등록되지 않은 게시물 id가 주어진다면")
-            class Context_with_not_exist_postId{
-                @Test
-                @DisplayName("게시물을 찾을 수 없다는 예외를 던진다")
-                public void it_throw_postNotFoundException(){
-                    assertThatThrownBy(() -> postService.update(1111L, updateData))
-                            .isInstanceOf(PostNotFoundException.class);
-                }
+        @Nested
+        @DisplayName("등록되지 않은 게시물 id가 주어진다면")
+        class Context_with_not_exist_postId{
+            @Test
+            @DisplayName("게시물을 찾을 수 없다는 예외를 던진다")
+            public void it_throw_postNotFoundException(){
+                assertThatThrownBy(() -> postService.update(1111L, updateData))
+                        .isInstanceOf(PostNotFoundException.class);
             }
         }
     }
