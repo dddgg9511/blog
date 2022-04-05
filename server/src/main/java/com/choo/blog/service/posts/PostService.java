@@ -5,6 +5,10 @@ import com.choo.blog.domain.posts.Posts;
 import com.choo.blog.dto.posts.PostRequestData;
 import com.choo.blog.exceptions.PostNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Example;
+import org.springframework.data.domain.ExampleMatcher;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -14,12 +18,12 @@ import java.util.List;
 public class PostService {
     private final PostRepository postRepository;
 
-    public List<Posts> getPosts(){
-        return null;
+    public Page<Posts> getPosts(Pageable pageable){
+        return postRepository.findAll(pageable);
     }
 
     public Posts getPost(Long id){
-        return null;
+        return postRepository.findById(id).orElseThrow(() -> new PostNotFoundException());
     }
 
     public Posts save(PostRequestData saveData){

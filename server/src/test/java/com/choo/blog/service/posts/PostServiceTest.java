@@ -11,6 +11,11 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+
+import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -95,6 +100,38 @@ class PostServiceTest {
             public void it_throw_postNotFoundException(){
                 assertThatThrownBy(() -> postService.update(1111L, updateData))
                         .isInstanceOf(PostNotFoundException.class);
+            }
+        }
+    }
+
+    @Nested
+    @DisplayName("게시물 목록 조회는")
+    class Descrive_findAll{
+        @Nested
+        @DisplayName("조회조건을 입력받으면")
+        class Context_with_search_condition{
+            int page = 0;
+            int pageSize = 10;
+            int size = 30;
+
+            Pageable pageable;
+
+            @BeforeEach
+            public void setUp(){
+                pageable = PageRequest.of(page,pageSize);
+
+                IntStream.range(0, size).forEach(i ->{
+                    postRepository.save(prepareRequestData(i + "").createEntity());
+                });
+            }
+
+            @Test
+            @DisplayName("조회 결과를 반환한다.")
+            public void it_return_paging_posts(){
+                Page<Posts> posts = postService.getPosts(pageable);
+                assertThat(posts.getTotalElements()).isEqualTo(size);
+                assertThat(posts.getTotalPages()).isEqualTo(size / pageSize);
+                assertThat(posts.getNumberOfElements()).isEqualTo(pageSize);
             }
         }
     }
