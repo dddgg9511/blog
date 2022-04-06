@@ -48,7 +48,7 @@ class PostControllerTest {
             @Test
             @DisplayName("게시물을 생성하고 생성된 게시물을 반환한다.")
             public void it_return_new_posts() throws Exception{
-                mockMvc.perform(post("/posts")
+                mockMvc.perform(post("/api/posts")
                             .contentType(MediaType.APPLICATION_JSON)
                             .accept(MediaTypes.HAL_JSON)
                             .content(objectMapper.writeValueAsString(saveData)))
@@ -61,7 +61,7 @@ class PostControllerTest {
                         .andExpect(jsonPath("content").value(saveData.getContent()))
                         .andExpect(jsonPath("likes").value(0))
                         .andExpect(jsonPath("dislikes").value(0))
-                        .andExpect(jsonPath("openType").value(saveData.getOpenType()))
+                        .andExpect(jsonPath("openType").value(saveData.getOpenType().toString()))
                         .andExpect(jsonPath("view").value(0))
                         .andExpect(jsonPath("_links.self").exists());
 
@@ -79,9 +79,9 @@ class PostControllerTest {
         }
 
         @Test
-        @DisplayName("에러코드 405를 반환한다.")
+        @DisplayName("에러코드 400를 반환한다.")
         public void it_return_bad_request() throws Exception{
-            mockMvc.perform(post("/posts")
+            mockMvc.perform(post("/api/posts")
                     .contentType(MediaType.APPLICATION_JSON)
                     .accept(MediaTypes.HAL_JSON)
                     .content(objectMapper.writeValueAsString(saveData)))
@@ -89,7 +89,7 @@ class PostControllerTest {
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("errors[0].objectName").exists())
                     .andExpect(jsonPath("errors[0].code").exists())
-                    .andExpect(jsonPath("errors[0].rejectedValue").exists());
+                    .andExpect(jsonPath("errors[0].rejectedValue").hasJsonPath());
         }
     }
 

@@ -1,7 +1,6 @@
 package com.choo.blog.domain.notifications;
 
 import com.choo.blog.domain.users.Users;
-import org.apache.catalina.User;
 import org.springframework.beans.factory.annotation.Value;
 
 import javax.persistence.*;
