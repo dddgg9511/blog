@@ -69,6 +69,30 @@ class PostControllerTest {
         }
     }
 
+    @Nested
+    @DisplayName("빈 데이터를 입력받으면")
+    class context_with_empty_data{
+        PostRequestData saveData;
+        @BeforeEach
+        public void setUp(){
+            saveData = new PostRequestData();
+        }
+
+        @Test
+        @DisplayName("에러코드 405를 반환한다.")
+        public void it_return_bad_request() throws Exception{
+            mockMvc.perform(post("/posts")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .accept(MediaTypes.HAL_JSON)
+                    .content(objectMapper.writeValueAsString(saveData)))
+                    .andDo(print())
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("errors[0].objectName").exists())
+                    .andExpect(jsonPath("errors[0].code").exists())
+                    .andExpect(jsonPath("errors[0].rejectedValue").exists());
+        }
+    }
+
 
     private PostRequestData prepareRequestData(String suffix){
         return PostRequestData.builder()
