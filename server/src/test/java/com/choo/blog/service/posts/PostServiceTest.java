@@ -1,6 +1,5 @@
 package com.choo.blog.service.posts;
 
-import com.choo.blog.domain.posts.PostOpenType;
 import com.choo.blog.domain.posts.PostRepository;
 import com.choo.blog.domain.posts.Posts;
 import com.choo.blog.dto.posts.PostRequestData;
@@ -15,6 +14,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
+import java.util.Optional;
 import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -134,6 +134,40 @@ class PostServiceTest {
                 assertThat(posts.getNumberOfElements()).isEqualTo(pageSize);
             }
         }
+    }
+
+    @Nested
+    @DisplayName("게시물 삭제는")
+    class Descrive_delete{
+        @Nested
+        @DisplayName("등록된 게시물 id가 주어진다면")
+        class context_with_exist_postId{
+            Posts posts;
+            @BeforeEach
+            public void setUp(){
+                posts = postRepository.save(prepareRequestData("").createEntity());
+            }
+            @Test
+            @DisplayName("게시물을 삭제한다.")
+            void it_delete_post(){
+                postService.delete(posts.getId());
+
+                Optional<Posts> optionalPosts = postRepository.findById(posts.getId());
+                assertThat(optionalPosts).isEmpty();
+            }
+        }
+
+        @Nested
+        @DisplayName("등록되지 않은 게시물 id가 주어진다면")
+        class Context_with_non_exise_postId{
+            @Test
+            @DisplayName("게시물을 찾을 수 없다는 예외를 던진다")
+            public void it_throw_postNotFoundException(){
+                assertThatThrownBy(()-> postService.delete(-1L))
+                        .isInstanceOf(PostNotFoundException.class);
+            }
+        }
+
     }
 
     private PostRequestData prepareRequestData(String suffix){
