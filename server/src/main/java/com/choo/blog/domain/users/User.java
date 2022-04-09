@@ -2,12 +2,13 @@ package com.choo.blog.domain.users;
 
 import com.choo.blog.domain.BaseEntity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonUnwrapped;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -22,10 +23,14 @@ public class User extends BaseEntity {
 
     private String email;
 
-    @JsonIgnore
     private String password;
     private String nickname;
     private String image;
     private LocalDate birthdate;
     private String description;
+
+    @JsonIgnore
+    public String getPassword() {
+        return password;
+    }
 }

@@ -2,10 +2,7 @@ package com.choo.blog.domain.users;
 
 import com.choo.blog.domain.posts.Post;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.condition.DisabledOnJre;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -40,6 +37,14 @@ class UserControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
+    @Autowired
+    private UserRepository userRepository;
+
+    @AfterEach
+    public void cleanUp(){
+        userRepository.deleteAll();
+    }
+
     @Nested
     @DisplayName("회원 가입은")
     class Describe_regist{
@@ -66,7 +71,7 @@ class UserControllerTest {
                         .andExpect(jsonPath("nickname").value(registData.getNickname()))
                         .andExpect(jsonPath("description").value(registData.getDescription()))
                         .andExpect(jsonPath("password").doesNotExist())
-                        .andExpect(jsonPath("_link.self").exists());
+                        .andExpect(jsonPath("_links.self").exists());
             }
         }
 
@@ -119,7 +124,7 @@ class UserControllerTest {
     }
 
     private User prepareUser(String suffix) throws Exception{
-        MvcResult result = mockMvc.perform(post("/api/posts")
+        MvcResult result = mockMvc.perform(post("/api/users")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaTypes.HAL_JSON)
                 .content(objectMapper.writeValueAsString(prepareUserRegistData(suffix)))).andReturn();

@@ -20,7 +20,7 @@ public class UserController {
 
     private final UserRegistDataValidator userRegistDataValidator;
 
-    @InitBinder("registData")
+    @InitBinder
     public void registDataInitBinder(WebDataBinder webDataBinder){
         webDataBinder.addValidators(userRegistDataValidator);
     }
