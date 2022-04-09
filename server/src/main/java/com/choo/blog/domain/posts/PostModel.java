@@ -13,6 +13,5 @@ public class PostModel extends EntityModel<Post> {
     public PostModel(Post posts, Link... links) {
         super(posts, (Iterable) Arrays.asList(links));
         add(linkTo(PostController.class).slash(posts.getId()).withSelfRel());
-
     }
 }

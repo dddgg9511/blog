@@ -10,6 +10,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledOnJre;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -258,6 +259,41 @@ class PostControllerTest {
             @DisplayName("에러코드 404를 반환한다.")
             void it_return_notFound() throws Exception {
                 mockMvc.perform(get("/api/posts/{id}", -1))
+                        .andExpect(status().isNotFound())
+                        .andExpect(jsonPath("message").value(Matchers.containsString("-1")));
+            }
+        }
+    }
+
+    @Nested
+    @DisplayName("게시물 삭제는")
+    class Descrive_delete_post{
+        @Nested
+        @DisplayName("존재하는 게시물 id가 주어지면")
+        class Context_with_exist_postId{
+            Post post;
+
+            @BeforeEach
+            void setUp() throws Exception {
+                post = preparePost("");
+            }
+
+            @Test
+            @DisplayName("게시물을 삭제하고 HTTP code 200을 반환한다")
+            void it_return_ok() throws Exception {
+                mockMvc.perform(delete("/api/posts/{id}", post.getId()))
+                        .andExpect(status().isOk());
+            }
+        }
+
+        @Nested
+        @DisplayName("존재하지 않는 게시물 id가 주어지면")
+        class Context_with_non_eixst_postId{
+
+            @Test
+            @DisplayName("에러코드 404를 반환한다.")
+            void it_return_notFound() throws Exception{
+                mockMvc.perform(delete("/api/posts/{id}", -1))
                         .andExpect(status().isNotFound())
                         .andExpect(jsonPath("message").value(Matchers.containsString("-1")));
             }
