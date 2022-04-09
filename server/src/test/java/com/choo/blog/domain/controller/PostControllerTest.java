@@ -125,7 +125,7 @@ class PostControllerTest {
                         .andExpect(jsonPath("content").value(updateData.getContent()))
                         .andExpect(jsonPath("likes").value(post.getLikes()))
                         .andExpect(jsonPath("dislikes").value(post.getDislikes()))
-                        .andExpect(jsonPath("openType").value(updateData.getOpenType()))
+                        .andExpect(jsonPath("openType").value(updateData.getOpenType().toString()))
                         .andExpect(jsonPath("view").value(post.getView()))
                         .andExpect(jsonPath("_links.self").exists());
             }

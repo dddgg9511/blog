@@ -23,7 +23,7 @@ public class PostService {
     }
 
     public Posts getPost(Long id){
-        return postRepository.findById(id).orElseThrow(() -> new PostNotFoundException());
+        return postRepository.findById(id).orElseThrow(() -> new PostNotFoundException(id));
     }
 
     public Posts save(PostRequestData saveData){
@@ -31,7 +31,7 @@ public class PostService {
     }
 
     public Posts update(Long id, PostRequestData updateData){
-        Posts posts = postRepository.findById(id).orElseThrow(() -> new PostNotFoundException());
+        Posts posts = postRepository.findById(id).orElseThrow(() -> new PostNotFoundException(id));
         posts.update(updateData);
 
         return posts;

@@ -9,10 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 
@@ -39,5 +36,19 @@ public class PostController {
         URI createdUri = selfLinkBuilder.toUri();
 
         return ResponseEntity.created(createdUri).body(postModel);
+    }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity updatePost(@PathVariable Long id,
+                                     @RequestBody @Valid PostRequestData updateData,
+                                     BindingResult result){
+        if(result.hasErrors()){
+            throw new InvalidParameterException(result);
+        }
+
+        Posts post = postService.update(id, updateData);
+        PostModel postModel = new PostModel(post);
+
+        return ResponseEntity.ok(postModel);
     }
 }
