@@ -3,7 +3,7 @@ package com.choo.blog.domain.posts;
 import com.choo.blog.domain.BaseEntity;
 import com.choo.blog.domain.categories.Category;
 import com.choo.blog.domain.comments.Comments;
-import com.choo.blog.domain.users.Users;
+import com.choo.blog.domain.users.User;
 import com.choo.blog.dto.posts.PostRequestData;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -26,7 +26,7 @@ public class Post extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
-    private Users author;
+    private User author;
 
     private String title;
 

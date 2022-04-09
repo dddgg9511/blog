@@ -1,7 +1,6 @@
 package com.choo.blog.domain.notifications;
 
-import com.choo.blog.domain.users.Users;
-import org.springframework.beans.factory.annotation.Value;
+import com.choo.blog.domain.users.User;
 
 import javax.persistence.*;
 
@@ -16,9 +15,9 @@ public class Notifications {
 
     @ManyToOne
     @JoinColumn(name = "sender_id")
-    private Users sender;
+    private User sender;
 
     @ManyToOne
     @JoinColumn(name = "receiver_id")
-    private Users receiver;
+    private User receiver;
 }
