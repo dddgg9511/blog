@@ -1,7 +1,7 @@
 package com.choo.blog.service.posts;
 
 import com.choo.blog.domain.posts.PostRepository;
-import com.choo.blog.domain.posts.Posts;
+import com.choo.blog.domain.posts.Post;
 import com.choo.blog.dto.posts.PostRequestData;
 import com.choo.blog.exceptions.PostNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
@@ -49,7 +49,7 @@ class PostServiceTest {
             @Test
             @DisplayName("저장하고 저장된 게시물을 반환한다.")
             void it_return_post(){
-                Posts posts = postService.save(saveData);
+                Post posts = postService.save(saveData);
 
                 assertThat(posts.getTitle()).isEqualTo(saveData.getTitle());
                 assertThat(posts.getContent()).isEqualTo(saveData.getContent());
@@ -74,7 +74,7 @@ class PostServiceTest {
         @Nested
         @DisplayName("등록된 게시물 id가 주어진다면")
         class Context_with_exist_postId{
-            Posts posts;
+            Post posts;
 
             @BeforeEach
             public void setUp(){
@@ -84,7 +84,7 @@ class PostServiceTest {
             @Test
             @DisplayName("id에 해당하는 게시물을 수정하고 수정된 게시물을 반환한다.")
             void it_update_post_return(){
-                Posts updatePost = postService.update(posts.getId(), updateData);
+                Post updatePost = postService.update(posts.getId(), updateData);
 
                 assertThat(updatePost.getTitle()).isEqualTo(updateData.getTitle());
                 assertThat(updatePost.getContent()).isEqualTo(updateData.getContent());
@@ -128,7 +128,7 @@ class PostServiceTest {
             @Test
             @DisplayName("조회 결과를 반환한다.")
             public void it_return_paging_posts(){
-                Page<Posts> posts = postService.getPosts(pageable);
+                Page<Post> posts = postService.getPosts(pageable);
                 assertThat(posts.getTotalElements()).isEqualTo(size);
                 assertThat(posts.getTotalPages()).isEqualTo(size / pageSize);
                 assertThat(posts.getNumberOfElements()).isEqualTo(pageSize);
@@ -142,7 +142,7 @@ class PostServiceTest {
         @Nested
         @DisplayName("등록된 게시물 id가 주어진다면")
         class context_with_exist_postId{
-            Posts posts;
+            Post posts;
             @BeforeEach
             public void setUp(){
                 posts = postRepository.save(prepareRequestData("").createEntity());
@@ -152,7 +152,7 @@ class PostServiceTest {
             void it_delete_post(){
                 postService.delete(posts.getId());
 
-                Optional<Posts> optionalPosts = postRepository.findById(posts.getId());
+                Optional<Post> optionalPosts = postRepository.findById(posts.getId());
                 assertThat(optionalPosts).isEmpty();
             }
         }

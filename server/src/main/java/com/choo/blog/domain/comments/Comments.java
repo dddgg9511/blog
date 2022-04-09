@@ -1,7 +1,7 @@
 package com.choo.blog.domain.comments;
 
 import com.choo.blog.domain.BaseEntity;
-import com.choo.blog.domain.posts.Posts;
+import com.choo.blog.domain.posts.Post;
 
 import javax.persistence.*;
 
@@ -13,7 +13,7 @@ public class Comments extends BaseEntity {
 
     @ManyToOne
     @JoinColumn(name = "post_id")
-    private Posts posts;
+    private Post posts;
 
     private String content;
 

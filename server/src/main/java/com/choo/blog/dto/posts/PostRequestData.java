@@ -1,7 +1,7 @@
 package com.choo.blog.dto.posts;
 
 import com.choo.blog.domain.posts.PostOpenType;
-import com.choo.blog.domain.posts.Posts;
+import com.choo.blog.domain.posts.Post;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -22,8 +22,8 @@ public class PostRequestData {
 
     private PostOpenType openType;
 
-    public Posts createEntity(){
-        return Posts.builder()
+    public Post createEntity(){
+        return Post.builder()
                 .title(title)
                 .content(content)
                 .likes(0)

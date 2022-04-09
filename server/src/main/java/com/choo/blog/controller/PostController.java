@@ -1,7 +1,7 @@
 package com.choo.blog.controller;
 
+import com.choo.blog.domain.posts.Post;
 import com.choo.blog.domain.posts.PostModel;
-import com.choo.blog.domain.posts.Posts;
 import com.choo.blog.dto.posts.PostRequestData;
 import com.choo.blog.exceptions.InvalidParameterException;
 import com.choo.blog.service.posts.PostService;
@@ -16,7 +16,6 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-
 import java.net.URI;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
@@ -33,7 +32,7 @@ public class PostController {
             throw new InvalidParameterException(result);
         }
 
-        Posts posts = postService.save(saveData);
+        Post posts = postService.save(saveData);
         PostModel postModel = new PostModel(posts);
 
         WebMvcLinkBuilder selfLinkBuilder = linkTo(PostController.class).slash(posts.getId());
@@ -50,18 +49,27 @@ public class PostController {
             throw new InvalidParameterException(result);
         }
 
-        Posts post = postService.update(id, updateData);
+        Post post = postService.update(id, updateData);
         PostModel postModel = new PostModel(post);
 
         return ResponseEntity.ok(postModel);
     }
 
     @GetMapping
-    public ResponseEntity queryPosts(Pageable pageable, PagedResourcesAssembler<Posts> assembler){
-        Page<Posts> page = postService.getPosts(pageable);
+    public ResponseEntity queryPosts(Pageable pageable, PagedResourcesAssembler<Post> assembler){
+        Page<Post> page = postService.getPosts(pageable);
 
         PagedModel<PostModel> postModels = assembler.toModel(page, e -> new PostModel(e));
 
         return ResponseEntity.ok(postModels);
+    }
+
+    @GetMapping("{id}")
+    public ResponseEntity getPost(@PathVariable Long id){
+        Post post = postService.getPost(id);
+
+        PostModel postModel = new PostModel(post);
+
+        return ResponseEntity.ok(postModel);
     }
 }

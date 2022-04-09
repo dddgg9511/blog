@@ -1,10 +1,11 @@
 package com.choo.blog.domain.controller;
 
 import com.choo.blog.domain.posts.PostOpenType;
-import com.choo.blog.domain.posts.Posts;
+import com.choo.blog.domain.posts.Post;
 import com.choo.blog.dto.posts.PostRequestData;
-import com.fasterxml.jackson.core.JsonProcessingException;
+import com.choo.blog.service.posts.PostService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -19,8 +20,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-
-import java.util.stream.IntStream;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -107,7 +106,7 @@ class PostControllerTest {
         @DisplayName("게시물 id와 수정 정보가 주어지면")
         class context_with_postId_and_update_info{
             PostRequestData updateData;
-            Posts post;
+            Post post;
 
             @BeforeEach
             void setUp() throws Exception {
@@ -223,13 +222,56 @@ class PostControllerTest {
         }
     }
 
-    private Posts preparePost(String suffix) throws Exception{
+    @Nested
+    @DisplayName("게시물 조회는")
+    class Describe_get_post{
+        @Nested
+        @DisplayName("존재하는 게시물 id가 주어지면")
+        class Context_with_exist_postId{
+            Post post;
+
+            @BeforeEach
+            public void setUp() throws Exception {
+                post = preparePost("");
+            }
+
+            @Test
+            @DisplayName("id에 해당하는 게시물을 반환한다.")
+            void it_return_post() throws Exception {
+                mockMvc.perform(get("/api/posts/{id}", post.getId())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .accept(MediaTypes.HAL_JSON))
+                        .andExpect(status().isOk())
+                        .andExpect(jsonPath("_links.self").exists())
+                        .andExpect(jsonPath("title").value(post.getTitle()))
+                        .andExpect(jsonPath("content").value(post.getContent()))
+                        .andExpect(jsonPath("likes").value(post.getLikes()))
+                        .andExpect(jsonPath("dislikes").value(post.getDislikes()))
+                        .andExpect(jsonPath("view").value(post.getView()));
+            }
+        }
+
+        @Nested
+        @DisplayName("존재하지 않는 게시물 id가 주어지면")
+        class Context_with_non_exist_postId{
+            @Test
+            @DisplayName("에러코드 404를 반환한다.")
+            void it_return_notFound() throws Exception {
+                mockMvc.perform(get("/api/posts/{id}", -1))
+                        .andExpect(status().isNotFound())
+                        .andExpect(jsonPath("message").value(Matchers.containsString("-1")));
+            }
+        }
+    }
+
+    private Post preparePost(String suffix) throws Exception{
         MvcResult result = mockMvc.perform(post("/api/posts")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaTypes.HAL_JSON)
                 .content(objectMapper.writeValueAsString(prepareRequestData(suffix)))).andReturn();
         String content = result.getResponse().getContentAsString();
-        return objectMapper.readValue(content, Posts.class);
+        System.out.println(content);
+        return objectMapper.readValue(content, Post.class);
     }
 
 
