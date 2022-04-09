@@ -9,6 +9,8 @@ import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Getter
 @NoArgsConstructor
@@ -28,8 +30,7 @@ public class UserRegistData {
 
     private String image;
 
-    @NotEmpty
-    private String birthdate;
+    private LocalDate birthdate;
 
     @NotEmpty
     private String description;
