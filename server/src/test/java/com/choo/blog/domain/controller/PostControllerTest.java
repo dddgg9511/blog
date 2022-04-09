@@ -3,6 +3,7 @@ package com.choo.blog.domain.controller;
 import com.choo.blog.domain.posts.PostOpenType;
 import com.choo.blog.domain.posts.Posts;
 import com.choo.blog.dto.posts.PostRequestData;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -11,14 +12,17 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import java.util.stream.IntStream;
+
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -177,6 +181,44 @@ class PostControllerTest {
                         .andExpect(jsonPath("errors[0].objectName").exists())
                         .andExpect(jsonPath("errors[0].code").exists())
                         .andExpect(jsonPath("errors[0].rejectedValue").hasJsonPath());
+            }
+        }
+    }
+
+    @Nested
+    @DisplayName("게시물 목록 조회는")
+    class Descrive_get_posts{
+        @Nested
+        @DisplayName("게시물 조회 조건을 입력받으면")
+        class Context_with_search_condition{
+            int page = 0;
+            int pageSize = 10;
+            int size = 30;
+
+
+            Pageable pageable;
+
+            @BeforeEach
+            public void setUp() throws Exception{
+                pageable = PageRequest.of(page, pageSize);
+
+                for(int i = 0; i < size; i++){
+                    preparePost(i + "");
+                }
+            }
+
+            @Test
+            @DisplayName("조회 결과를 반환한다.")
+            public void it_return_paging_posts() throws Exception {
+                mockMvc.perform(get("/api/posts")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaTypes.HAL_JSON)
+                        .content(objectMapper.writeValueAsString(pageable)))
+                        .andDo(print())
+                        .andExpect(status().isOk())
+                        .andExpect(jsonPath("page").exists())
+                        .andExpect(jsonPath("_links.self").exists())
+                        .andExpect(jsonPath("_embedded.postsList[0]._links.self").exists());
             }
         }
     }

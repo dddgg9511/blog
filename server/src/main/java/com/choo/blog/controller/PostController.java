@@ -6,6 +6,10 @@ import com.choo.blog.dto.posts.PostRequestData;
 import com.choo.blog.exceptions.InvalidParameterException;
 import com.choo.blog.service.posts.PostService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PagedResourcesAssembler;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -50,5 +54,14 @@ public class PostController {
         PostModel postModel = new PostModel(post);
 
         return ResponseEntity.ok(postModel);
+    }
+
+    @GetMapping
+    public ResponseEntity queryPosts(Pageable pageable, PagedResourcesAssembler<Posts> assembler){
+        Page<Posts> page = postService.getPosts(pageable);
+
+        PagedModel<PostModel> postModels = assembler.toModel(page, e -> new PostModel(e));
+
+        return ResponseEntity.ok(postModels);
     }
 }
