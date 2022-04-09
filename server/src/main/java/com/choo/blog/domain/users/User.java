@@ -21,7 +21,7 @@ public class User extends BaseEntity {
     private Long id;
 
     private String email;
-    private String pw;
+    private String password;
     private String nickname;
     private String image;
     private LocalDateTime birthdate;
