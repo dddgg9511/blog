@@ -4,6 +4,7 @@ import com.choo.blog.domain.users.User;
 import com.choo.blog.domain.users.dto.UserLoginData;
 import com.choo.blog.domain.users.dto.UserRegistData;
 import com.choo.blog.domain.users.repository.UserRepository;
+import com.choo.blog.exceptions.InvalidTokenException;
 import com.choo.blog.exceptions.LoginFailException;
 import com.choo.blog.exceptions.PasswordNotMatchException;
 import com.choo.blog.util.WebTokenUtil;
@@ -37,21 +38,22 @@ class AuthenticationServiceTest {
     @Autowired
     private UserRepository userRepository;
 
+    User user;
+
+    @BeforeEach
+    public void setUp(){
+        user = userService.join(prepareUserRegistData(""));
+    }
+
+    @AfterEach
+    public void cleanUp(){
+        userRepository.deleteAll();
+    }
+
     @Nested
     @DisplayName("로그인은")
     class Describe_login{
         UserLoginData userLoginData;
-        User user;
-
-        @BeforeEach
-        public void setUp(){
-            user = userService.join(prepareUserRegistData(""));
-        }
-
-        @AfterEach
-        public void cleanUp(){
-            userRepository.deleteAll();
-        }
 
         @Nested
         @DisplayName("로그인 정보가 주어지면")
@@ -108,6 +110,47 @@ class AuthenticationServiceTest {
                 assertThatThrownBy(() -> authenticationService.login(userLoginData))
                         .isInstanceOf(PasswordNotMatchException.class)
                         .hasMessageContaining(userLoginData.getEmail());
+            }
+        }
+    }
+
+    @Nested
+    @DisplayName("토큰 파싱은")
+    class Describe_parseToken{
+        @Nested
+        @DisplayName("유효한 토큰이 주어지면")
+        class Context_with_valid_token{
+            String validToken;
+
+            @BeforeEach
+            void setUp(){
+                validToken = webTokenUtil.encode(user.getId());
+            }
+
+            @Test
+            @DisplayName("회원 id를 반환한다")
+            void it_return_userId(){
+                Long userId = authenticationService.parseToken(validToken);
+                assertThat(userId).isEqualTo(user.getId());
+            }
+        }
+
+        @Nested
+        @DisplayName("인증되지 않은 토큰이 주어지면")
+        class Context_with_invalid_token{
+            String invalidToken;
+
+            @BeforeEach
+            void setUp(){
+                invalidToken = webTokenUtil.encode(user.getId()) + "wrong";
+            }
+
+            @Test
+            @DisplayName("인증되지 않은 토큰이라는 예외를 던진다")
+            void it_throw_invalidTokenException(){
+                assertThatThrownBy(() -> authenticationService.parseToken(invalidToken))
+                        .isInstanceOf(InvalidTokenException.class)
+                        .hasMessageContaining(invalidToken);
             }
         }
     }
