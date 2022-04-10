@@ -1,6 +1,7 @@
 package com.choo.blog.domain.users.controller;
 
 import com.choo.blog.domain.users.User;
+import com.choo.blog.domain.users.dto.SessionResponseData;
 import com.choo.blog.domain.users.dto.UserLoginData;
 import com.choo.blog.domain.users.dto.UserRegistData;
 import com.choo.blog.domain.users.repository.UserRepository;

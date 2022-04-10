@@ -3,12 +3,14 @@ package com.choo.blog.domain.controller;
 import com.choo.blog.domain.posts.PostOpenType;
 import com.choo.blog.domain.posts.Post;
 import com.choo.blog.domain.posts.dto.PostRequestData;
+import com.choo.blog.domain.users.User;
+import com.choo.blog.domain.users.dto.SessionResponseData;
+import com.choo.blog.domain.users.dto.UserLoginData;
+import com.choo.blog.domain.users.dto.UserRegistData;
+import com.choo.blog.domain.users.repository.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.hamcrest.Matchers;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -19,6 +21,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+
+import java.time.LocalDate;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -31,11 +35,34 @@ class PostControllerTest {
     private static final String TITLE = "게시물 제목";
     private static final String CONTENT = "게시물 내용";
 
+    private static final String EMAIL = "choo@email.com";
+    private static final String PASSWORD = "choo@1234";
+    private static final String NICKNAME = "choo";
+    private static final LocalDate BIRTH_DATE = LocalDate.of(1995,11,18);
+    private static final String DESCRIPTION = "description";
+
+    private User user;
+    private SessionResponseData session;
+
     @Autowired
     MockMvc mockMvc;
 
     @Autowired
     ObjectMapper objectMapper;
+
+    @Autowired
+    UserRepository userRepository;
+
+    @BeforeEach
+    void setUp() throws Exception {
+        user = prepareUser("");
+        session = login(prepareLoginData());
+    }
+
+    @AfterEach
+    void cleanUp(){
+        userRepository.deleteAll();
+    }
 
     @Nested
     @DisplayName("게시물 생성은")
@@ -46,7 +73,7 @@ class PostControllerTest {
             PostRequestData saveData;
 
             @BeforeEach
-            public void setUp(){
+            public void setUp() throws Exception {
                 saveData = prepareRequestData("");
             }
 
@@ -56,7 +83,8 @@ class PostControllerTest {
                 mockMvc.perform(post("/api/posts")
                             .contentType(MediaType.APPLICATION_JSON)
                             .accept(MediaTypes.HAL_JSON)
-                            .content(objectMapper.writeValueAsString(saveData)))
+                            .content(objectMapper.writeValueAsString(saveData))
+                            .header(HttpHeaders.AUTHORIZATION,  "Bearer " + session.getAccessToken()))
                         .andDo(print())
                         .andExpect(status().isCreated())
                         .andExpect(jsonPath("id").exists())
@@ -69,7 +97,6 @@ class PostControllerTest {
                         .andExpect(jsonPath("openType").value(saveData.getOpenType().toString()))
                         .andExpect(jsonPath("view").value(0))
                         .andExpect(jsonPath("_links.self").exists());
-
             }
         }
 
@@ -88,13 +115,60 @@ class PostControllerTest {
                 mockMvc.perform(post("/api/posts")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .accept(MediaTypes.HAL_JSON)
-                                .content(objectMapper.writeValueAsString(saveData)))
+                                .content(objectMapper.writeValueAsString(saveData))
+                                .header(HttpHeaders.AUTHORIZATION,  "Bearer " + session.getAccessToken()))
                         .andDo(print())
                         .andExpect(status().isBadRequest())
                         .andExpect(jsonPath("errors[0].objectName").exists())
                         .andExpect(jsonPath("errors[0].code").exists())
                         .andExpect(jsonPath("errors[0].rejectedValue").hasJsonPath());
             }
+        }
+
+        @Nested
+        @DisplayName("잘못된 인증정보로 요청하면")
+        class Context_with_wrong_accessToken{
+            PostRequestData saveData;
+
+            @BeforeEach
+            public void setUp() throws Exception {
+                saveData = prepareRequestData("");
+            }
+
+            @Test
+            @DisplayName("에러코드 401을 반환한다")
+            public void it_return_unAuthorized() throws Exception{
+                mockMvc.perform(post("/api/posts")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .accept(MediaTypes.HAL_JSON)
+                                .content(objectMapper.writeValueAsString(saveData))
+                                .header(HttpHeaders.AUTHORIZATION,  "Bearer " + session.getAccessToken() + "wrong"))
+                        .andDo(print())
+                        .andExpect(status().isUnauthorized());
+            }
+        }
+
+        @Nested
+        @DisplayName("인증정보가 없으면")
+        class Context_with_no_accessToken{
+            PostRequestData saveData;
+
+            @BeforeEach
+            public void setUp() throws Exception {
+                saveData = prepareRequestData("");
+            }
+
+            @Test
+            @DisplayName("에러코드 401을 반환한다.")
+            public void it_return_unAuthorize() throws Exception{
+                mockMvc.perform(post("/api/posts")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .accept(MediaTypes.HAL_JSON)
+                                .content(objectMapper.writeValueAsString(saveData)))
+                        .andDo(print())
+                        .andExpect(status().isUnauthorized());
+            }
+
         }
     }
 
@@ -119,7 +193,8 @@ class PostControllerTest {
                 mockMvc.perform(patch("/api/posts/{id}",post.getId())
                             .contentType(MediaType.APPLICATION_JSON)
                             .accept(MediaTypes.HAL_JSON)
-                            .content(objectMapper.writeValueAsString(updateData)))
+                            .content(objectMapper.writeValueAsString(updateData))
+                            .header(HttpHeaders.AUTHORIZATION,  "Bearer " + session.getAccessToken()))
                         .andDo(print())
                         .andExpect(status().isOk())
                         .andExpect(jsonPath("id").value(post.getId()))
@@ -130,6 +205,56 @@ class PostControllerTest {
                         .andExpect(jsonPath("openType").value(updateData.getOpenType().toString()))
                         .andExpect(jsonPath("view").value(post.getView()))
                         .andExpect(jsonPath("_links.self").exists());
+            }
+
+            @Nested
+            @DisplayName("잘못된 인증정보로 요청하면")
+            class Context_with_wrong_accessToken{
+                PostRequestData updateData;
+                Post post;
+
+                @BeforeEach
+                public void setUp() throws Exception {
+                    post = preparePost("");
+                    updateData = prepareRequestData("_NEW");
+                }
+
+                @Test
+                @DisplayName("에러코드 401을 반환한다")
+                public void it_return_unAuthorized() throws Exception{
+                    mockMvc.perform(patch("/api/posts/{id}",post.getId())
+                                    .contentType(MediaType.APPLICATION_JSON)
+                                    .accept(MediaTypes.HAL_JSON)
+                                    .content(objectMapper.writeValueAsString(updateData))
+                                    .header(HttpHeaders.AUTHORIZATION,  "Bearer " + session.getAccessToken() + "wrong"))
+                            .andDo(print())
+                            .andExpect(status().isUnauthorized());
+                }
+            }
+
+            @Nested
+            @DisplayName("인증정보가 없으면")
+            class Context_with_no_accessToken{
+                Post post;
+                PostRequestData updateData;
+
+                @BeforeEach
+                public void setUp() throws Exception {
+                    post = preparePost("");
+                    updateData = prepareRequestData("NEW");
+                }
+
+                @Test
+                @DisplayName("에러코드 401을 반환한다.")
+                public void it_return_unAuthorize() throws Exception{
+                    mockMvc.perform(patch("/api/posts/{id}",post.getId())
+                                    .contentType(MediaType.APPLICATION_JSON)
+                                    .accept(MediaTypes.HAL_JSON)
+                                    .content(objectMapper.writeValueAsString(updateData)))
+                            .andDo(print())
+                            .andExpect(status().isUnauthorized());
+                }
+
             }
         }
 
@@ -146,9 +271,10 @@ class PostControllerTest {
             @DisplayName("에러코드 404를 반환한다.")
             public void it_return_postNotFoundException() throws Exception {
                 mockMvc.perform(patch("/api/posts/{id}", -1)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaTypes.HAL_JSON)
-                        .content(objectMapper.writeValueAsString(updateData)))
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .accept(MediaTypes.HAL_JSON)
+                                .content(objectMapper.writeValueAsString(updateData))
+                                .header(HttpHeaders.AUTHORIZATION,  "Bearer " + session.getAccessToken()))
                         .andDo(print())
                         .andExpect(status().isNotFound())
                         .andExpect(jsonPath("message").exists())
@@ -173,7 +299,8 @@ class PostControllerTest {
                 mockMvc.perform(post("/api/posts")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .accept(MediaTypes.HAL_JSON)
-                                .content(objectMapper.writeValueAsString(updateData)))
+                                .content(objectMapper.writeValueAsString(updateData))
+                                .header(HttpHeaders.AUTHORIZATION,  "Bearer " + session.getAccessToken()))
                         .andDo(print())
                         .andExpect(status().isBadRequest())
                         .andExpect(jsonPath("errors[0].objectName").exists())
@@ -209,9 +336,10 @@ class PostControllerTest {
             @DisplayName("조회 결과를 반환한다.")
             public void it_return_paging_posts() throws Exception {
                 mockMvc.perform(get("/api/posts")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaTypes.HAL_JSON)
-                        .content(objectMapper.writeValueAsString(pageable)))
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .accept(MediaTypes.HAL_JSON)
+                                .content(objectMapper.writeValueAsString(pageable))
+                                .header(HttpHeaders.AUTHORIZATION,  "Bearer " + session.getAccessToken()))
                         .andDo(print())
                         .andExpect(status().isOk())
                         .andExpect(jsonPath("page").exists())
@@ -239,7 +367,8 @@ class PostControllerTest {
             void it_return_post() throws Exception {
                 mockMvc.perform(get("/api/posts/{id}", post.getId())
                             .contentType(MediaType.APPLICATION_JSON)
-                            .accept(MediaTypes.HAL_JSON))
+                            .accept(MediaTypes.HAL_JSON)
+                            .header(HttpHeaders.AUTHORIZATION,  "Bearer " + session.getAccessToken()))
                         .andExpect(status().isOk())
                         .andExpect(jsonPath("_links.self").exists())
                         .andExpect(jsonPath("title").value(post.getTitle()))
@@ -256,7 +385,8 @@ class PostControllerTest {
             @Test
             @DisplayName("에러코드 404를 반환한다.")
             void it_return_notFound() throws Exception {
-                mockMvc.perform(get("/api/posts/{id}", -1))
+                mockMvc.perform(get("/api/posts/{id}", -1)
+                                .header(HttpHeaders.AUTHORIZATION,  "Bearer " + session.getAccessToken()))
                         .andExpect(status().isNotFound())
                         .andExpect(jsonPath("message").value(Matchers.containsString("-1")));
             }
@@ -279,7 +409,8 @@ class PostControllerTest {
             @Test
             @DisplayName("게시물을 삭제하고 HTTP code 200을 반환한다")
             void it_return_ok() throws Exception {
-                mockMvc.perform(delete("/api/posts/{id}", post.getId()))
+                mockMvc.perform(delete("/api/posts/{id}", post.getId())
+                                .header(HttpHeaders.AUTHORIZATION,  "Bearer " + session.getAccessToken()))
                         .andExpect(status().isOk());
             }
         }
@@ -291,29 +422,113 @@ class PostControllerTest {
             @Test
             @DisplayName("에러코드 404를 반환한다.")
             void it_return_notFound() throws Exception{
-                mockMvc.perform(delete("/api/posts/{id}", -1))
+                mockMvc.perform(delete("/api/posts/{id}", -1)
+                                .header(HttpHeaders.AUTHORIZATION,  "Bearer " + session.getAccessToken()))
                         .andExpect(status().isNotFound())
                         .andExpect(jsonPath("message").value(Matchers.containsString("-1")));
             }
         }
+
+        @Nested
+        @DisplayName("잘못된 인증정보로 요청하면")
+        class Context_with_wrong_accessToken{
+            Post post;
+
+            @BeforeEach
+            public void setUp() throws Exception {
+                post = preparePost("");
+            }
+
+            @Test
+            @DisplayName("에러코드 401을 반환한다")
+            public void it_return_unAuthorized() throws Exception{
+                mockMvc.perform(delete("/api/posts/{id}",post.getId())
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .accept(MediaTypes.HAL_JSON)
+                                .header(HttpHeaders.AUTHORIZATION,  "Bearer " + session.getAccessToken() + "wrong"))
+                        .andDo(print())
+                        .andExpect(status().isUnauthorized());
+            }
+        }
+
+        @Nested
+        @DisplayName("인증정보가 없으면")
+        class Context_with_no_accessToken{
+            Post post;
+
+            @BeforeEach
+            public void setUp() throws Exception {
+                post = preparePost("");
+            }
+
+            @Test
+            @DisplayName("에러코드 401을 반환한다.")
+            public void it_return_unAuthorize() throws Exception{
+                mockMvc.perform(delete("/api/posts/{id}",post.getId())
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .accept(MediaTypes.HAL_JSON))
+                        .andDo(print())
+                        .andExpect(status().isUnauthorized());
+            }
+
+        }
+
     }
 
     private Post preparePost(String suffix) throws Exception{
         MvcResult result = mockMvc.perform(post("/api/posts")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaTypes.HAL_JSON)
-                .content(objectMapper.writeValueAsString(prepareRequestData(suffix)))).andReturn();
+                .content(objectMapper.writeValueAsString(prepareRequestData(suffix)))
+                .header(HttpHeaders.AUTHORIZATION,  "Bearer " + session.getAccessToken()))
+                .andReturn();
         String content = result.getResponse().getContentAsString();
         System.out.println(content);
         return objectMapper.readValue(content, Post.class);
     }
 
+    private SessionResponseData login(UserLoginData loginData) throws Exception{
+        MvcResult result = mockMvc.perform(post("/session")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaTypes.HAL_JSON)
+                .content(objectMapper.writeValueAsString(loginData))).andReturn();
+        String content = result.getResponse().getContentAsString();
+        System.out.println(content);
+        return objectMapper.readValue(content, SessionResponseData.class);
+    }
 
     private PostRequestData prepareRequestData(String suffix){
         return PostRequestData.builder()
                 .title(TITLE + suffix)
                 .content(CONTENT + suffix)
                 .openType(PostOpenType.ALL)
+                .build();
+    }
+
+    private UserLoginData prepareLoginData(){
+        return UserLoginData.builder()
+                .email(EMAIL)
+                .password(PASSWORD)
+                .build();
+    }
+
+    private User prepareUser(String suffix) throws Exception{
+        MvcResult result = mockMvc.perform(post("/api/users")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaTypes.HAL_JSON)
+                .content(objectMapper.writeValueAsString(prepareUserRegistData(suffix)))).andReturn();
+        String content = result.getResponse().getContentAsString();
+        System.out.println(content);
+        return objectMapper.readValue(content, User.class);
+    }
+
+    public UserRegistData prepareUserRegistData(String suffix){
+        return UserRegistData.builder()
+                .email(EMAIL)
+                .password(PASSWORD)
+                .nickname(NICKNAME)
+                .birthdate(BIRTH_DATE)
+                .description(DESCRIPTION)
                 .build();
     }
 }

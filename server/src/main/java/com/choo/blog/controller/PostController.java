@@ -12,6 +12,7 @@ import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,6 +28,7 @@ public class PostController {
     private final PostService postService;
 
     @PostMapping
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity createPost(@RequestBody @Valid PostRequestData saveData, BindingResult result){
         if(result.hasErrors()){
             throw new InvalidParameterException(result);
@@ -42,6 +44,7 @@ public class PostController {
     }
 
     @PatchMapping("/{id}")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity updatePost(@PathVariable Long id,
                                      @RequestBody @Valid PostRequestData updateData,
                                      BindingResult result){
@@ -74,6 +77,7 @@ public class PostController {
     }
 
     @DeleteMapping("{id}")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity deletePost(@PathVariable Long id){
         postService.delete(id);
 
