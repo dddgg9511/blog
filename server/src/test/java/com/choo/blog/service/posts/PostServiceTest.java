@@ -106,6 +106,42 @@ class PostServiceTest {
     }
 
     @Nested
+    @DisplayName("게시물 상세 조회는")
+    class Describe_find{
+        @Nested
+        @DisplayName("존재하는 게시물 id가 주어지면")
+        class Context_with_exist_postId{
+            Post post;
+
+            @BeforeEach
+            void setUp(){
+                post = postService.save(prepareRequestData(""));
+            }
+
+            @Test
+            @DisplayName("id 에 해당하는 게시물을 반환한다")
+            void it_return_post(){
+                Post findPost = postService.getPost(this.post.getId());
+
+                assertThat(findPost.getTitle()).isEqualTo(post.getTitle());
+                assertThat(findPost.getContent()).isEqualTo(post.getContent());
+                assertThat(findPost.getOpenType()).isEqualTo(post.getOpenType());
+            }
+        }
+
+        @Nested
+        @DisplayName("존재하지 않는 게시물 id가 주어지면")
+        class Context_with_non_exsit_postId{
+            @Test
+            @DisplayName("게시물을 찾을 수 없다는 예외를 던진다")
+            void it_throw_postNotFoundException(){
+                assertThatThrownBy(() -> postService.getPost(-1L))
+                        .isInstanceOf(PostNotFoundException.class);
+            }
+        }
+    }
+
+    @Nested
     @DisplayName("게시물 목록 조회는")
     class Descrive_findAll{
         @Nested
