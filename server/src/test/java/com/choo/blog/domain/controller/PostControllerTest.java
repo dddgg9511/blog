@@ -2,15 +2,13 @@ package com.choo.blog.domain.controller;
 
 import com.choo.blog.domain.posts.PostOpenType;
 import com.choo.blog.domain.posts.Post;
-import com.choo.blog.dto.posts.PostRequestData;
-import com.choo.blog.service.posts.PostService;
+import com.choo.blog.domain.posts.dto.PostRequestData;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.DisabledOnJre;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;

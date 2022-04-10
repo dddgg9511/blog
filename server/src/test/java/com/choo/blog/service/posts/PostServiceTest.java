@@ -1,8 +1,9 @@
 package com.choo.blog.service.posts;
 
-import com.choo.blog.domain.posts.PostRepository;
+import com.choo.blog.domain.posts.repository.PostRepository;
 import com.choo.blog.domain.posts.Post;
-import com.choo.blog.dto.posts.PostRequestData;
+import com.choo.blog.domain.posts.service.PostService;
+import com.choo.blog.domain.posts.dto.PostRequestData;
 import com.choo.blog.exceptions.PostNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

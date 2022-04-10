@@ -1,5 +1,8 @@
-package com.choo.blog.domain.users;
+package com.choo.blog.domain.users.service;
 
+import com.choo.blog.domain.users.repository.UserRepository;
+import com.choo.blog.domain.users.dto.UserRegistData;
+import com.choo.blog.domain.users.User;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.security.crypto.password.PasswordEncoder;

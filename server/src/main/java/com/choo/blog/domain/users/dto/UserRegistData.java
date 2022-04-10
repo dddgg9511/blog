@@ -1,4 +1,4 @@
-package com.choo.blog.domain.users;
+package com.choo.blog.domain.users.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

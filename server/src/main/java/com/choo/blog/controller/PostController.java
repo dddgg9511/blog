@@ -1,10 +1,10 @@
 package com.choo.blog.controller;
 
 import com.choo.blog.domain.posts.Post;
-import com.choo.blog.domain.posts.PostModel;
-import com.choo.blog.dto.posts.PostRequestData;
+import com.choo.blog.domain.posts.dto.PostModel;
+import com.choo.blog.domain.posts.dto.PostRequestData;
 import com.choo.blog.exceptions.InvalidParameterException;
-import com.choo.blog.service.posts.PostService;
+import com.choo.blog.domain.posts.service.PostService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

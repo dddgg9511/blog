@@ -1,9 +1,9 @@
 package com.choo.blog.domain.users;
 
-import com.choo.blog.domain.posts.Post;
+import com.choo.blog.domain.users.dto.UserRegistData;
+import com.choo.blog.domain.users.repository.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.*;
-import org.junit.jupiter.api.condition.DisabledOnJre;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -15,7 +15,6 @@ import org.springframework.test.web.servlet.MvcResult;
 
 import java.time.LocalDate;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;

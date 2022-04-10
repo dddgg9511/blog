@@ -1,4 +1,4 @@
-package com.choo.blog.dto.posts;
+package com.choo.blog.domain.posts.dto;
 
 import com.choo.blog.domain.posts.PostOpenType;
 import com.choo.blog.domain.posts.Post;

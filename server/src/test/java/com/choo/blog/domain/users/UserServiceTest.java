@@ -1,5 +1,7 @@
 package com.choo.blog.domain.users;
 
+import com.choo.blog.domain.users.dto.UserRegistData;
+import com.choo.blog.domain.users.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -11,7 +13,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import java.time.LocalDate;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @DisplayName("회원 관리")

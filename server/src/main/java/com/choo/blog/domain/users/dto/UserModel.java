@@ -1,5 +1,7 @@
-package com.choo.blog.domain.users;
+package com.choo.blog.domain.users.dto;
 
+import com.choo.blog.domain.users.controller.UserController;
+import com.choo.blog.domain.users.User;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
 

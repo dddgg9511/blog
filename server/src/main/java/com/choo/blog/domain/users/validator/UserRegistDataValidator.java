@@ -1,6 +1,8 @@
-package com.choo.blog.domain.users;
+package com.choo.blog.domain.users.validator;
 
 
+import com.choo.blog.domain.users.repository.UserRepository;
+import com.choo.blog.domain.users.dto.UserRegistData;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.Errors;
