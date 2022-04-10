@@ -42,7 +42,7 @@ public class PostService {
         Post posts = postRepository.findById(id).orElseThrow(() -> new PostNotFoundException(id));
         UserAuthentication authentication = getLoginInfo();
 
-        if(posts.hasModifyPermission(authentication.getUserId())){
+        if(!posts.hasModifyPermission(authentication.getUserId())){
             throw new ForbiddenPostException(posts.getId());
         }
         posts.update(updateData);
