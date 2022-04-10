@@ -1,9 +1,9 @@
 package com.choo.blog.service.posts;
 
-import com.choo.blog.domain.posts.repository.PostRepository;
 import com.choo.blog.domain.posts.Post;
-import com.choo.blog.domain.posts.service.PostService;
 import com.choo.blog.domain.posts.dto.PostRequestData;
+import com.choo.blog.domain.posts.repository.PostRepository;
+import com.choo.blog.domain.posts.service.PostService;
 import com.choo.blog.exceptions.PostNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -14,6 +14,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.test.context.support.WithMockUser;
 
 import java.util.Optional;
 import java.util.stream.IntStream;
@@ -23,6 +24,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest
 @DisplayName("게시물 관리")
+@WithMockUser
 class PostServiceTest {
     private static final String TITLE = "게시물 제목";
     private static final String CONTENT = "게시물 내용";
@@ -114,7 +116,7 @@ class PostServiceTest {
             Post post;
 
             @BeforeEach
-            void setUp(){
+            void setUp() throws Exception {
                 post = postService.save(prepareRequestData(""));
             }
 
