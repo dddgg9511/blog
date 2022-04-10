@@ -5,6 +5,7 @@ import com.choo.blog.domain.posts.dto.PostRequestData;
 import com.choo.blog.domain.posts.repository.PostRepository;
 import com.choo.blog.domain.posts.service.PostService;
 import com.choo.blog.exceptions.PostNotFoundException;
+import com.choo.blog.session.WithMockCustomUser;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -24,7 +25,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest
 @DisplayName("게시물 관리")
-@WithMockUser
+@WithMockCustomUser
 class PostServiceTest {
     private static final String TITLE = "게시물 제목";
     private static final String CONTENT = "게시물 내용";

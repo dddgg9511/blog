@@ -10,8 +10,8 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import java.util.ArrayList;
 import java.util.List;
 
+@Getter
 public class UserAuthentication extends AbstractAuthenticationToken {
-    @Getter
     private String accessToken;
 
     private Long userId;
