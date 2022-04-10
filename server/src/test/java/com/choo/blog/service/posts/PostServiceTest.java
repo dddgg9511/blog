@@ -4,8 +4,17 @@ import com.choo.blog.domain.posts.Post;
 import com.choo.blog.domain.posts.dto.PostRequestData;
 import com.choo.blog.domain.posts.repository.PostRepository;
 import com.choo.blog.domain.posts.service.PostService;
+import com.choo.blog.domain.users.User;
+import com.choo.blog.domain.users.UserRole;
+import com.choo.blog.domain.users.dto.UserRegistData;
+import com.choo.blog.domain.users.repository.UserRepository;
+import com.choo.blog.domain.users.service.UserService;
+import com.choo.blog.exceptions.ForbiddenPostException;
 import com.choo.blog.exceptions.PostNotFoundException;
+import com.choo.blog.security.UserAuthentication;
 import com.choo.blog.session.WithMockCustomUser;
+import com.choo.blog.util.WebTokenUtil;
+import org.h2.engine.UserBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -15,8 +24,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.security.core.context.SecurityContextHolder;
 
+import java.time.LocalDate;
 import java.util.Optional;
 import java.util.stream.IntStream;
 
@@ -30,11 +40,33 @@ class PostServiceTest {
     private static final String TITLE = "게시물 제목";
     private static final String CONTENT = "게시물 내용";
 
+    private static final String EMAIL = "choo@email.com";
+    private static final String PASSWORD = "password";
+    private static final String NICKNAME = "choo";
+    private static final LocalDate BIRTH_DATE = LocalDate.of(1995,11,18);
+    private static final String DESCRIPTION = "description";
+
     @Autowired
     PostService postService;
 
     @Autowired
     PostRepository postRepository;
+
+    @Autowired
+    UserRepository userRepository;
+
+    @Autowired
+    UserService userService;
+
+    @Autowired
+    WebTokenUtil webTokenUtil;
+
+    @BeforeEach
+    void setUp(){
+        User user = prepareUser("");
+        String accessToken = webTokenUtil.encode(user.getId());
+        SecurityContextHolder.getContext().setAuthentication(new UserAuthentication(UserRole.Authorized, accessToken, user.getId()));
+    }
 
     @Nested
     @DisplayName("게시물 저장은")
@@ -61,6 +93,9 @@ class PostServiceTest {
                 assertThat(posts.getLikes()).isEqualTo(0);
                 assertThat(posts.getDislikes()).isEqualTo(0);
                 assertThat(posts.getView()).isEqualTo(0);
+
+                UserAuthentication authentication = (UserAuthentication) SecurityContextHolder.getContext().getAuthentication();
+                assertThat(posts.getAuthor().getId()).isEqualTo(authentication.getUserId());
             }
         }
     }
@@ -104,6 +139,29 @@ class PostServiceTest {
             public void it_throw_postNotFoundException(){
                 assertThatThrownBy(() -> postService.update(1111L, updateData))
                         .isInstanceOf(PostNotFoundException.class);
+            }
+        }
+
+        @Nested
+        @DisplayName("게시물 생성 저자와 다른 인증정보가 주어진다면")
+        class Context_with_wrong_authentication{
+            Post post;
+            PostRequestData updateData;
+
+            @BeforeEach
+            void setUp(){
+                User author = prepareUser("other");
+                updateData = prepareRequestData("_NEW");
+                post = postRepository.save(prepareRequestData("").createEntity(author));
+
+            }
+
+            @Test
+            @DisplayName("게시물 수정권한이 없다는 예외를 던진다.")
+            public void it_throw_accessForbiddenModifyPost(){
+                assertThatThrownBy(() -> postService.update(post.getId(), updateData))
+                        .isInstanceOf(ForbiddenPostException.class)
+                        .hasMessageContaining(post.getId().toString());
             }
         }
     }
@@ -160,8 +218,10 @@ class PostServiceTest {
             public void setUp(){
                 pageable = PageRequest.of(page,pageSize);
 
+                User author = prepareUser("");
+
                 IntStream.range(0, size).forEach(i ->{
-                    postRepository.save(prepareRequestData(i + "").createEntity());
+                    postRepository.save(prepareRequestData(i + "").createEntity(author));
                 });
             }
 
@@ -185,7 +245,8 @@ class PostServiceTest {
             Post posts;
             @BeforeEach
             public void setUp(){
-                posts = postRepository.save(prepareRequestData("").createEntity());
+                User author = userService.join(prepareUserRegistData(""));
+                posts = postRepository.save(prepareRequestData("").createEntity(author));
             }
             @Test
             @DisplayName("게시물을 삭제한다.")
@@ -208,6 +269,41 @@ class PostServiceTest {
             }
         }
 
+        @Nested
+        @DisplayName("게시물 생성 저자와 다른 인증정보가 주어진다면")
+        class Context_with_wrong_authentication{
+            Post post;
+
+            @BeforeEach
+            void setUp(){
+                User author = prepareUser("other");
+                post = postRepository.save(prepareRequestData("").createEntity(author));
+
+            }
+
+            @Test
+            @DisplayName("게시물 수정권한이 없다는 예외를 던진다.")
+            public void it_throw_accessForbiddenModifyPost(){
+                assertThatThrownBy(() -> postService.delete(post.getId()))
+                        .isInstanceOf(ForbiddenPostException.class)
+                        .hasMessageContaining(post.getId().toString());
+            }
+        }
+
+    }
+
+    public User prepareUser(String suffix){
+        return userService.join(prepareUserRegistData(suffix));
+    }
+
+    public UserRegistData prepareUserRegistData(String suffix){
+        return UserRegistData.builder()
+                .email(EMAIL)
+                .password(PASSWORD)
+                .nickname(NICKNAME)
+                .birthdate(BIRTH_DATE)
+                .description(DESCRIPTION)
+                .build();
     }
 
     private PostRequestData prepareRequestData(String suffix){
