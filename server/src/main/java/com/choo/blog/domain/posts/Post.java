@@ -49,6 +49,10 @@ public class Post extends BaseEntity {
     @OneToMany(mappedBy = "posts")
     private List<Comments> commentsList = new ArrayList<>();
 
+    public boolean hasModifyPermission(Long userId){
+        return author.getId().equals(userId);
+    }
+
     public void update(PostRequestData requestData){
         title = requestData.getTitle();
         content = requestData.getContent();

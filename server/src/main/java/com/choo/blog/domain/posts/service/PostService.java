@@ -31,16 +31,18 @@ public class PostService {
     }
 
     public Post save(PostRequestData saveData){
-        User author = getLoginUser();
+        UserAuthentication authentication = getLoginInfo();
+        User author = userRepository.findById(authentication.getUserId())
+                .orElseThrow(() -> new UserNotFoundException(authentication.getUserId()));
 
         return postRepository.save(saveData.createEntity(author));
     }
 
     public Post update(Long id, PostRequestData updateData){
         Post posts = postRepository.findById(id).orElseThrow(() -> new PostNotFoundException(id));
-        User user = getLoginUser();
+        UserAuthentication authentication = getLoginInfo();
 
-        if(!posts.getAuthor().getId().equals(user.getId())){
+        if(posts.hasModifyPermission(authentication.getUserId())){
             throw new ForbiddenPostException(posts.getId());
         }
         posts.update(updateData);
@@ -49,18 +51,17 @@ public class PostService {
     }
 
     public void delete(Long id){
-        Post post = getPost(id);User user = getLoginUser();
+        Post post = getPost(id);
+        UserAuthentication authentication = getLoginInfo();
 
-        if(!post.getAuthor().getId().equals(user.getId())){
+        if(!post.getAuthor().getId().equals(authentication.getUserId())){
             throw new ForbiddenPostException(post.getId());
         }
 
         postRepository.delete(post);
     }
 
-    private User getLoginUser(){
-        UserAuthentication authentication = (UserAuthentication) SecurityContextHolder.getContext().getAuthentication();
-        return userRepository.findById(authentication.getUserId())
-                .orElseThrow(() -> new UserNotFoundException(authentication.getUserId()));
+    private UserAuthentication getLoginInfo(){
+        return (UserAuthentication) SecurityContextHolder.getContext().getAuthentication();
     }
 }
