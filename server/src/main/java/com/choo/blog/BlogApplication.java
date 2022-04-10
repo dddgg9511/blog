@@ -21,19 +21,4 @@ public class BlogApplication {
     public static void main(String[] args) {
         SpringApplication.run(BlogApplication.class, args);
     }
-
-    @Bean
-    RouterFunction<ServerResponse> routerFunction() {
-        return route(GET("/swagger"), req ->
-                ServerResponse.temporaryRedirect(URI.create("swagger-ui/index.html")).build());
-    }
-
-    @Bean
-    public ModelMapper modelMapper(){
-        ModelMapper modelMapper = new ModelMapper();
-        modelMapper.getConfiguration()
-                .setFieldAccessLevel(Configuration.AccessLevel.PRIVATE)
-                .setFieldMatchingEnabled(true);
-        return modelMapper;
-    }
 }

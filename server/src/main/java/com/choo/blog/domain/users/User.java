@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import javax.persistence.*;
 import java.time.LocalDate;
@@ -32,5 +33,9 @@ public class User extends BaseEntity {
     @JsonIgnore
     public String getPassword() {
         return password;
+    }
+
+    public void encrypte(PasswordEncoder passwordEncoder) {
+        this.password = passwordEncoder.encode(password);
     }
 }

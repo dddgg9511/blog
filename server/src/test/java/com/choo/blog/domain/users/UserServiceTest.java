@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDate;
 
@@ -20,6 +21,10 @@ class UserServiceTest {
     private static final String NICKNAME = "choo";
     private static final LocalDate BIRTH_DATE = LocalDate.of(1995,11,18);
     private static final String DESCRIPTION = "description";
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     @Nested
     @DisplayName("회원 가입은")
     class Descrive_join{
@@ -45,6 +50,7 @@ class UserServiceTest {
                 assertThat(user.getBirthdate()).isEqualTo(registData.getBirthdate());
                 assertThat(user.getDescription()).isEqualTo(registData.getDescription());
                 assertThat(user.getNickname()).isEqualTo(registData.getNickname());
+                assertThat(passwordEncoder.matches(registData.getPassword(), user.getPassword())).isTrue();
             }
         }
     }
